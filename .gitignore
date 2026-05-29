@@ -1,0 +1,29 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[codz]
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Tooling caches
+.ruff_cache/
+.mypy_cache/
+.ty_cache/
+
+# Environments
+.venv/
+venv/
+.env
+
+# Editors
+.idea/
+.vscode/
