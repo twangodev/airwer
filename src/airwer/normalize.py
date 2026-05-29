@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 # annotation spans: [..], (..), <..>
 _BRACKET_RE = re.compile(r"[\[(<][^\])>]*[\])>]")
 _PUNCT_EXCEPT_DOT = re.compile(r"[^a-z0-9\s.]")
+_GLUED_RE = re.compile(r"\b([a-z]+)(\d+)\b")  # "qnh1017" -> "qnh 1017"
 _DOT_RE = re.compile(r"\.")
 _WS_RE = re.compile(r"\s+")
 
@@ -46,6 +47,12 @@ def _drop_words(text: str, words: frozenset[str]) -> str:
 
 def _expand_contractions(text: str) -> str:
     return " ".join(_CONTRACTIONS.get(tok, tok) for tok in text.split())
+
+
+def _spell_acronyms(text: str) -> str:
+    return " ".join(
+        " ".join(tok) if tok in vocab.ACRONYMS else tok for tok in text.split()
+    )
 
 
 def _expand_callsigns(text: str) -> str:
@@ -78,6 +85,10 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
         s = _drop_words(s, vocab.FILLERS)
     if cfg.fold_nato:
         s = _map_words(s, vocab.NATO_VARIANTS)
+    if cfg.split_alnum:
+        s = _GLUED_RE.sub(r"\1 \2", s)
+    if cfg.spell_acronyms:
+        s = _spell_acronyms(s)
     if cfg.reconcile_numbers:
         s = reconcile(s)
     if cfg.fold_spelling:

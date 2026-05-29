@@ -50,6 +50,11 @@ def test_filler_removal_scores_zero():
     assert airwer.wer("uh turn right", "turn right") == 0.0
 
 
+def test_solid_vs_spelled_acronym_equal():
+    assert airwer.wer("cleared ils approach", "cleared i l s approach") == 0.0
+    assert airwer.wer("qnh1017", "q n h one zero one seven") == 0.0
+
+
 def test_sid_breakdown():
     r = airwer.process(["turn left", "descend now"], ["turn right", "descend now"])
     assert r.substitutions == 1

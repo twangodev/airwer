@@ -39,6 +39,14 @@ class WerConfig:
     ``flight level two five zero`` == ``FL250``, ``one one eight decimal one``
     == ``118.1``)."""
 
+    split_alnum: bool = True
+    """Split glued letter+digit tokens (``qnh1017`` -> ``qnh 1017``,
+    ``runway25`` -> ``runway 25``) so context words and numbers fold separately."""
+
+    spell_acronyms: bool = True
+    """Spell curated ATC letter-acronyms (``ILS``, ``QNH`` ...) letter-by-letter
+    so a solid acronym matches its spelled form (``ils`` == ``i l s``)."""
+
     expand_contractions: bool = False
     """Expand English contractions (``don't`` -> ``do not``)."""
 
@@ -66,6 +74,8 @@ RAW = WerConfig(
     strip_fillers=False,
     fold_nato=False,
     reconcile_numbers=False,
+    split_alnum=False,
+    spell_acronyms=False,
 )
 
 #: Default ATC scoring: all content-neutral folds, no opinionated ones.

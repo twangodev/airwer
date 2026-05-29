@@ -36,6 +36,13 @@ FILLERS: frozenset[str] = frozenset({
     "ah", "ahh", "eh", "hmm", "hm", "mm", "mmm", "mhm",
 })  # fmt: skip
 
+# letter-acronyms voiced (and transcribed) letter-by-letter; spelled on both
+# sides so a solid "ils" matches a spelled "i l s"
+ACRONYMS: frozenset[str] = frozenset({
+    "ils", "qnh", "qfe", "dme", "vor", "ndb", "ifr", "vfr",
+    "atis", "rvr", "adf", "rnav", "klm", "ups",
+})  # fmt: skip
+
 PROCEDURE_SYNONYMS: dict[str, str] = {
     "affirmative": "affirm",
 }

@@ -33,9 +33,22 @@ def test_xray_hyphen_stripped():
     assert normalize("hotel x-ray") == "hotel xray"
 
 
+def test_acronym_spelled_letter_by_letter():
+    assert normalize("ILS") == "i l s"
+    assert (
+        normalize("contact tower QNH 1017") == "contact tower q n h one zero one seven"
+    )
+
+
+def test_glued_alnum_split():
+    assert normalize("runway25") == "runway two five"
+    assert normalize("QNH1017") == "q n h one zero one seven"
+
+
 def test_raw_profile_applies_no_atc_folds():
     assert normalize("alpha", profiles.RAW) == "alpha"
     assert normalize("FL250", profiles.RAW) == "fl250"
+    assert normalize("ILS", profiles.RAW) == "ils"
 
 
 def test_semantic_drops_function_words():
