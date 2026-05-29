@@ -4,6 +4,8 @@
     ".": {
       "release-type": "python",
       "package-name": "airwer",
+      "include-component-in-tag": false,
+      "include-v-in-tag": true,
       "extra-files": [
         "src/airwer/_version.py"
       ]
