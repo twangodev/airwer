@@ -1,6 +1,6 @@
 [project]
 name = "airwer"
-version = "0.0.0"
+version = "0.1.0"
 description = "Word Error Rate for Air Traffic Control"
 authors = [
     {name = "James Ding", email = "james@twango.dev"},
