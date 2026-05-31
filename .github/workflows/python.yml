@@ -53,6 +53,11 @@ jobs:
           files: ./coverage.xml
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload test results to Codecov
+        uses: codecov/test-results-action@v1
+        if: ${{ !cancelled() && matrix.python-version == '3' }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
     name: Build Package

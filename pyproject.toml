@@ -88,7 +88,7 @@ lint-fix = "ruff check --fix ."
 format-fix = "ruff format ."
 fix = ["lint-fix", "format-fix"]
 
-test = "pytest tests/unit/ -v --cov=src/airwer --cov-report=xml --cov-report=term"
+test = "pytest tests/unit/ -v --cov=src/airwer --cov-report=xml --cov-report=term --junitxml=junit.xml -o junit_family=legacy"
 
 [tool.poe.tasks.build]
 cmd = "uv build"

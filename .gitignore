@@ -12,6 +12,7 @@ dist/
 .coverage
 .coverage.*
 coverage.xml
+junit.xml
 htmlcov/
 
 # Tooling caches
