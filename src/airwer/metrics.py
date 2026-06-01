@@ -6,7 +6,7 @@ raw ``jiwer.wer()`` scalar throws away:
 
 * substitution / insertion / deletion / hit counts (via ``jiwer.process_words``),
   so a substituted altitude digit is distinguishable from a deleted filler;
-* **bounded** per-utterance statistics — per-utterance WER is unbounded
+* **bounded** per-utterance statistics: per-utterance WER is unbounded
   (a hallucinated repeat against a short reference can exceed 1.0 by a lot), so
   the headline distribution uses values clamped to ``[0, 1]`` while ``wer_max``
   and ``n_runaway`` preserve the raw signal;
@@ -203,8 +203,8 @@ def agreement(a: str, b: str, config: WerConfig | None = None) -> float:
 
     Neither side is a privileged reference: the score is the word edit distance
     normalized by the longer side, so it is symmetric and bounded. Defined for
-    empties — two blanks agree (``1.0``), one blank against real words does not
-    (``0.0``) — which makes it safe for model-vs-model voting, where :func:`wer`
+    empties: two blanks agree (``1.0``), one blank against real words does not
+    (``0.0``), which makes it safe for model-vs-model voting, where :func:`wer`
     would divide by an empty reference and return ``nan``.
     """
     cfg = config if config is not None else CANONICAL
