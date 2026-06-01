@@ -198,6 +198,32 @@ def wer(
     return process(reference, hypothesis, config).wer
 
 
+def agreement(a: str, b: str, config: WerConfig | None = None) -> float:
+    """Symmetric agreement between two transcripts, in ``[0, 1]`` (``1`` = identical).
+
+    Neither side is a privileged reference: the score is the word edit distance
+    normalized by the longer side, so it is symmetric and bounded. Defined for
+    empties — two blanks agree (``1.0``), one blank against real words does not
+    (``0.0``) — which makes it safe for model-vs-model voting, where :func:`wer`
+    would divide by an empty reference and return ``nan``.
+    """
+    cfg = config if config is not None else CANONICAL
+    na, nb = normalize(a, cfg), normalize(b, cfg)
+    if not na and not nb:
+        return 1.0
+    if not na or not nb:
+        return 0.0
+    words = jiwer.process_words(
+        na, nb, reference_transform=_WORDS_TR, hypothesis_transform=_WORDS_TR
+    )
+    edits = words.substitutions + words.insertions + words.deletions
+    longer = max(
+        words.hits + words.substitutions + words.deletions,
+        words.hits + words.substitutions + words.insertions,
+    )
+    return 1.0 - min(1.0, edits / longer)
+
+
 def cer(
     reference: str | Sequence[str],
     hypothesis: str | Sequence[str],

@@ -20,13 +20,14 @@ from __future__ import annotations
 from airwer import profiles, vocab
 from airwer._version import __version__
 from airwer.config import WerConfig
-from airwer.metrics import WerResult, cer, ladder, numeric_wer, process, wer
+from airwer.metrics import WerResult, agreement, cer, ladder, numeric_wer, process, wer
 from airwer.normalize import normalize
 
 __all__ = [
     "WerConfig",
     "WerResult",
     "__version__",
+    "agreement",
     "cer",
     "ladder",
     "normalize",

@@ -19,6 +19,34 @@ def test_equivalent_readouts_score_zero():
     assert airwer.wer("cleared alfa bravo", "cleared alpha bravo") == 0.0
 
 
+def test_agreement_equivalent_readouts_is_one():
+    assert (
+        airwer.agreement("descend FL250", "descend flight level two five zero") == 1.0
+    )
+
+
+def test_agreement_both_blank_is_one():
+    assert airwer.agreement("", "") == 1.0
+    assert airwer.agreement("uh", "") == 1.0
+
+
+def test_agreement_blank_vs_text_is_zero():
+    assert airwer.agreement("", "cleared to land") == 0.0
+    assert airwer.agreement("cleared to land", "") == 0.0
+
+
+def test_agreement_is_symmetric():
+    a, b = "turn heading two one zero", "turn heading 220"
+    assert airwer.agreement(a, b) == airwer.agreement(b, a)
+
+
+def test_agreement_partial_is_between_zero_and_one():
+    score = airwer.agreement(
+        "brickyard four niner six descend", "skyhawk four nine six climb"
+    )
+    assert 0.0 < score < 1.0
+
+
 def test_genuine_error_is_kept():
     assert airwer.wer("turn heading two one zero", "turn heading 220") > 0.0
 
