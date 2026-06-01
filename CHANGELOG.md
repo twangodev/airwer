@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/twangodev/airwer/compare/v0.2.0...v0.2.1) (2026-06-01)
+
+
+### Bug Fixes
+
+* **deps:** lower minimum jiwer to 3.0.3 ([3131a25](https://github.com/twangodev/airwer/commit/3131a2574c3acb40cc113a678a4943b72f3924f8))
+
 ## [0.2.0](https://github.com/twangodev/airwer/compare/v0.1.0...v0.2.0) (2026-06-01)
 
 
