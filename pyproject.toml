@@ -6,7 +6,7 @@ authors = [
     {name = "James Ding", email = "james@twango.dev"},
 ]
 dependencies = [
-    "jiwer>=3.0.3,<5",
+    "jiwer>=4.0,<5",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
