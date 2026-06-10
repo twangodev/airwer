@@ -61,3 +61,16 @@ def test_semantic_expands_contraction():
 
 def test_semantic_expands_callsign():
     assert normalize("EWG7AB", profiles.SEMANTIC) == "eurowings seven alfa bravo"
+
+
+def test_sentence_final_dot_does_not_block_number_folding():
+    assert normalize("November 896. Left turn climbing.") == (
+        "november eight nine six left turn climbing"
+    )
+    assert normalize("Squawk 1503.") == "squawk one five zero three"
+
+
+def test_decimal_survives_trailing_sentence_dot():
+    assert normalize("Contact departure 125.7.") == (
+        "contact departure one two five decimal seven"
+    )
