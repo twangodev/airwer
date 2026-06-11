@@ -13,6 +13,16 @@ def test_tags_removed():
     assert normalize("turn right [unintelligible]") == "turn right"
 
 
+def test_unmatched_opener_does_not_swallow_speech():
+    assert normalize("speed < 250 (readback correct) maintain") == (
+        "speed two five zero maintain"
+    )
+
+
+def test_adjacent_annotations_removed_independently():
+    assert normalize("[noise] (static) turn left <coughs>") == "turn left"
+
+
 def test_partial_word_fragment_removed():
     assert normalize("heading(-ding) two one zero") == "heading two one zero"
 
