@@ -63,6 +63,14 @@ def test_semantic_expands_callsign():
     assert normalize("EWG7AB", profiles.SEMANTIC) == "eurowings seven alfa bravo"
 
 
+def test_semantic_expands_prefix_digits_callsign():
+    assert normalize("DLH123", profiles.SEMANTIC) == "lufthansa one two three"
+
+
+def test_semantic_keeps_glued_acronym_split():
+    assert normalize("QNH1017", profiles.SEMANTIC) == "q n h one zero one seven"
+
+
 def test_sentence_final_dot_does_not_block_number_folding():
     assert normalize("November 896. Left turn climbing.") == (
         "november eight nine six left turn climbing"

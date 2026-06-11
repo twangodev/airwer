@@ -140,6 +140,10 @@ def test_empty_input_raises():
         airwer.process([], [])
 
 
+def test_semantic_callsign_expansion_scores_zero():
+    assert airwer.wer("lufthansa one two three", "DLH123", profiles.SEMANTIC) == 0.0
+
+
 def test_semantic_profile_changes_score():
     # "affirmative" vs "affirm" is a substitution under canonical, equal under semantic.
     assert airwer.wer("affirmative", "affirm") > 0.0
