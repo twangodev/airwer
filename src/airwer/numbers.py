@@ -82,10 +82,12 @@ def _take_run(tokens: list[str], start: int) -> tuple[list[str] | None, int]:
     """Collect a maximal number run beginning at ``start``.
 
     Returns ``(run, next_index)``, or ``(None, start)`` when ``tokens[start]``
-    does not begin a number. ``and`` is consumed as a connector only between
-    numeric tokens (``two thousand and five hundred``).
+    does not begin a number. ``and`` is consumed as a connector only right
+    after a magnitude word (``two thousand and five hundred``); between
+    independent numbers (``two and three thousand``) it stays literal so
+    distinct values are never fused.
     """
-    if not _is_number_token(tokens[start]):
+    if tokens[start] in _DECIMAL_WORDS or not _is_number_token(tokens[start]):
         return None, start
     run: list[str] = []
     j = start
@@ -98,15 +100,18 @@ def _take_run(tokens: list[str], start: int) -> tuple[list[str] | None, int]:
         elif (
             tok == "and"
             and run
+            and run[-1] in _SCALE
             and j + 1 < n
             and _is_number_token(tokens[j + 1], strong_only=True)
+            and tokens[j + 1] not in _DECIMAL_WORDS
         ):
             j += 1  # drop the connector
         else:
             break
-    # drop a dangling decimal marker ("two point")
+    # a dangling decimal marker ("two point") stays a literal token
     while run and run[-1] in _DECIMAL_WORDS:
         run.pop()
+        j -= 1
     # reject a weak-only run (a lone "oh") that the weak start admitted
     if not any(_is_number_token(t, strong_only=True) for t in run):
         return None, start

@@ -69,6 +69,18 @@ def test_colloquial_cardinal_not_falsely_equal():
     assert airwer.wer("two fifty", "two fifty") == 0.0
 
 
+def test_and_separated_numbers_not_falsely_equal():
+    # Regression: "two and three thousand" must not fuse to 5000.
+    assert airwer.wer("between two and three thousand", "between 5000") > 0.0
+    assert airwer.wer("two thousand and five hundred", "2500") == 0.0
+
+
+def test_dangling_point_not_silently_deleted():
+    # Regression: a trailing or leading "point" is a literal word, not a deletion.
+    assert airwer.wer("hold at point two", "hold at two") > 0.0
+    assert airwer.wer("at gate two point", "at gate two") > 0.0
+
+
 def test_different_squawk_with_leading_zero_not_equal():
     # Regression: a leading zero must not be collapsed by a following tens word.
     assert airwer.wer("squawk zero ten", "squawk one zero") > 0.0
