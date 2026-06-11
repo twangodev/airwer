@@ -84,7 +84,7 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
     'turn heading two one zero descend flight level two five zero'
     """
     cfg = config if config is not None else CANONICAL
-    s = text.lower()
+    s = text.lower().replace("\u2018", "'").replace("\u2019", "'")
     if cfg.strip_tags:
         s = _BRACKET_RE.sub(" ", s)
     if cfg.expand_contractions:
