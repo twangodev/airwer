@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from airwer.config import WerConfig
 
 # annotation spans: [..], (..), <..>
-_BRACKET_RE = re.compile(r"[\[(<][^\])>]*[\])>]")
+_BRACKET_RE = re.compile(r"\[[^\]]*\]|\([^)]*\)|<[^>]*>")
 _PUNCT_EXCEPT_DOT = re.compile(r"[^a-z0-9\s.]")
 _NON_DECIMAL_DOT_RE = re.compile(r"(?<!\d)\.|\.(?!\d)")
 _GLUED_RE = re.compile(r"\b([a-z]+)(\d+)\b")  # "qnh1017" -> "qnh 1017"
