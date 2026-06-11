@@ -4,7 +4,9 @@ A single ordered pipeline, applied symmetrically to references and hypotheses,
 turns raw transcripts into the canonical token string that WER is computed over.
 Step order is load-bearing: bracketed annotations and contractions are handled
 *before* punctuation is stripped (so ``[unintelligible]`` and ``don't`` resolve
-correctly), and numbers are reconciled *before* the decimal point is removed.
+correctly), callsigns are expanded *before* glued letter+digit tokens are split
+(so ``DLH123`` reaches the expander intact), and numbers are reconciled
+*before* the decimal point is removed.
 """
 
 from __future__ import annotations
@@ -59,8 +61,15 @@ def _spell_acronyms(text: str) -> str:
 def _expand_callsigns(text: str) -> str:
     out: list[str] = []
     for tok in text.split():
-        # only alnum codes still carrying a digit (plain words / numbers do not)
-        if any(c.isdigit() for c in tok) and any(c.isalpha() for c in tok):
+        # only alnum codes still carrying a digit (plain words / numbers do not);
+        # glued letters+digits expand only on a known operator prefix so codes
+        # like "qnh1017" stay eligible for the glued split
+        glued = _GLUED_RE.fullmatch(tok)
+        if (
+            any(c.isdigit() for c in tok)
+            and any(c.isalpha() for c in tok)
+            and (glued is None or glued.group(1) in vocab.ICAO_TELEPHONY)
+        ):
             spoken = vocab.expand_callsign(tok)
             out.append(spoken if spoken is not None else tok)
         else:
@@ -87,6 +96,8 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
         s = _drop_words(s, vocab.FILLERS)
     if cfg.fold_nato:
         s = _map_words(s, vocab.NATO_VARIANTS)
+    if cfg.expand_callsigns:
+        s = _expand_callsigns(s)
     if cfg.split_alnum:
         s = _GLUED_RE.sub(r"\1 \2", s)
     if cfg.spell_acronyms:
@@ -97,8 +108,6 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
         s = _map_words(s, vocab.SPELLING)
     if cfg.fold_procedure_words:
         s = _map_words(s, vocab.PROCEDURE_SYNONYMS)
-    if cfg.expand_callsigns:
-        s = _expand_callsigns(s)
     if cfg.drop_function_words:
         s = _drop_words(s, vocab.FUNCTION_WORDS)
     s = _DOT_RE.sub(" ", s)
