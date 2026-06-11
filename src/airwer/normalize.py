@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 # annotation spans: [..], (..), <..>
 _BRACKET_RE = re.compile(r"[\[(<][^\])>]*[\])>]")
 _PUNCT_EXCEPT_DOT = re.compile(r"[^a-z0-9\s.]")
+_NON_DECIMAL_DOT_RE = re.compile(r"(?<!\d)\.|\.(?!\d)")
 _GLUED_RE = re.compile(r"\b([a-z]+)(\d+)\b")  # "qnh1017" -> "qnh 1017"
 _DOT_RE = re.compile(r"\.")
 _WS_RE = re.compile(r"\s+")
@@ -81,6 +82,7 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
         s = _expand_contractions(s)
     # delete, not space: "x-ray" -> "xray", "10,000" -> "10000"
     s = _PUNCT_EXCEPT_DOT.sub("", s)
+    s = _NON_DECIMAL_DOT_RE.sub(" ", s)
     if cfg.strip_fillers:
         s = _drop_words(s, vocab.FILLERS)
     if cfg.fold_nato:
