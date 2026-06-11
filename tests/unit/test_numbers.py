@@ -44,6 +44,23 @@ def test_and_connector_inside_composite():
     assert reconcile("two thousand and five hundred") == "two five zero zero"
 
 
+def test_and_between_independent_numbers_stays_literal():
+    # "two and three thousand" must never fuse to 5000.
+    assert (
+        reconcile("between two and three thousand")
+        == "between two and three zero zero zero"
+    )
+    assert reconcile("runway two and three are closed") == (
+        "runway two and three are closed"
+    )
+    assert reconcile("two and three") == "two and three"
+
+
+def test_dangling_decimal_word_kept_as_literal():
+    assert reconcile("hold at point two") == "hold at point two"
+    assert reconcile("at gate two point") == "at gate two point"
+
+
 def test_scale_anchored_tens_and_units():
     # With an explicit scale word the value is unambiguous and folds.
     assert reconcile("two hundred fifty") == "two five zero"
