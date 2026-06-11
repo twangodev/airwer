@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.2](https://github.com/twangodev/airwer/compare/v0.2.1...v0.2.2) (2026-06-11)
+
+
+### Bug Fixes
+
+* expand callsigns before splitting glued letter+digit tokens ([#14](https://github.com/twangodev/airwer/issues/14)) ([e00f698](https://github.com/twangodev/airwer/commit/e00f6985afed106835251e9e715a2021582f7089))
+* fold typographic apostrophes before contraction expansion ([#12](https://github.com/twangodev/airwer/issues/12)) ([9e53244](https://github.com/twangodev/airwer/commit/9e53244baaa1ad9af90b34deba4385d780ff6ebf))
+* pair each bracket opener only with its matching closer ([#11](https://github.com/twangodev/airwer/issues/11)) ([bc78323](https://github.com/twangodev/airwer/commit/bc78323b56fd07997671486faf9e4e964ec052a9))
+* sentence-final dots no longer block number reconciliation ([#9](https://github.com/twangodev/airwer/issues/9)) ([f1c1517](https://github.com/twangodev/airwer/commit/f1c1517a21596818a2ea5e2f93593b09e1185fb7))
+* stop 'and' fusing distinct numbers and keep dangling decimal words ([#13](https://github.com/twangodev/airwer/issues/13)) ([8df9698](https://github.com/twangodev/airwer/commit/8df96981c7fcf14c310d076715f54f78c950002f))
+
 ## [0.2.1](https://github.com/twangodev/airwer/compare/v0.2.0...v0.2.1) (2026-06-01)
 
 
