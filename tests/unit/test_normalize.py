@@ -59,6 +59,10 @@ def test_semantic_expands_contraction():
     assert normalize("don't descend", profiles.SEMANTIC) == "do not descend"
 
 
+def test_semantic_expands_typographic_apostrophe_contraction():
+    assert normalize("don\u2019t descend", profiles.SEMANTIC) == "do not descend"
+
+
 def test_semantic_expands_callsign():
     assert normalize("EWG7AB", profiles.SEMANTIC) == "eurowings seven alfa bravo"
 
