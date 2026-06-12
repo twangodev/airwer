@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/twangodev/airwer/compare/v0.2.2...v0.2.3) (2026-06-12)
+
+
+### Bug Fixes
+
+* normalization and scoring fixes from transcript audit ([#18](https://github.com/twangodev/airwer/issues/18)) ([f1a4083](https://github.com/twangodev/airwer/commit/f1a40833ce2ddc8b854c37fdf61a0d3fe9a783e1))
+
 ## [0.2.2](https://github.com/twangodev/airwer/compare/v0.2.1...v0.2.2) (2026-06-11)
 
 
