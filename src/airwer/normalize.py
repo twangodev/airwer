@@ -105,7 +105,10 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
     s = _XRAY_RE.sub("xray", s)
     # delete, not space: "don't" -> "dont", "10,000" -> "10000"
     s = _PUNCT_EXCEPT_DOT.sub("", s)
-    s = _NON_DECIMAL_DOT_RE.sub(" ", s)
+    # a sentence dot is also a number-run boundary: "270. Three thousand"
+    # must not fuse. The sentinel survives the token-wise steps below and is
+    # consumed at the reconcile step (or stripped, for configs without it).
+    s = _NON_DECIMAL_DOT_RE.sub(" \x00 ", s)
     if cfg.strip_fillers:
         s = _drop_words(s, vocab.FILLERS)
     if cfg.fold_nato:
@@ -117,7 +120,8 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
     if cfg.spell_acronyms:
         s = _spell_acronyms(s)
     if cfg.reconcile_numbers:
-        s = reconcile(s)
+        s = " ".join(reconcile(chunk) for chunk in s.split("\x00"))
+    s = s.replace("\x00", " ")
     if cfg.fold_spelling:
         s = _map_words(s, vocab.SPELLING)
     if cfg.fold_procedure_words:

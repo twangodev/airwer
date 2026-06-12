@@ -115,3 +115,33 @@ def test_squawk_digits():
 
 def test_non_numeric_text_untouched():
     assert reconcile("turn left then contact tower") == "turn left then contact tower"
+
+
+def test_atc_digit_group_before_scale_concatenates():
+    # "one seven thousand" is 17,000 (ATC digit-group), not (1+7)*1000
+    assert reconcile("one seven thousand") == "one seven zero zero zero"
+    assert reconcile("two five thousand") == "two five zero zero zero"
+    # leading zero group: "one zero thousand" is 10,000
+    assert reconcile("one zero thousand") == "one zero zero zero zero"
+    # group + trailing hundreds: 14,600
+    assert (
+        reconcile("one four thousand six hundred")
+        == "one four six zero zero"
+    )
+
+
+def test_standard_english_composites_still_fold():
+    assert reconcile("eight thousand") == "eight zero zero zero"
+    assert reconcile("ten thousand") == "one zero zero zero zero"
+    assert reconcile("twenty five hundred") == "two five zero zero"
+    assert reconcile("two thousand and five hundred") == "two five zero zero"
+    assert reconcile("one hundred and five") == "one zero five"
+    assert reconcile("two hundred fifty thousand") == "two five zero zero zero zero"
+
+
+def test_malformed_scale_stack_left_as_words():
+    # repeated readback must NOT fuse to 6000
+    assert reconcile("three thousand three thousand") == (
+        "three thousand three thousand"
+    )
+    assert reconcile("two thousand thousand") == "two thousand thousand"

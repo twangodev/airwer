@@ -118,3 +118,14 @@ def test_accents_fold_to_base_letters():
 
 def test_digit_comma_still_deleted_not_spaced():
     assert normalize("10,000") == "one zero zero zero zero"
+
+
+def test_sentence_dot_breaks_number_runs():
+    # "270. Three thousand" must not fuse into one number run
+    assert normalize("heading 270. Three thousand.") == (
+        "heading two seven zero three zero zero zero"
+    )
+    # while decimals still survive their trailing sentence dot
+    assert normalize("Contact 125.7. Good day.") == (
+        "contact one two five decimal seven good day"
+    )

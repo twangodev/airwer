@@ -118,30 +118,64 @@ def _take_run(tokens: list[str], start: int) -> tuple[list[str] | None, int]:
     return run, j
 
 
-def _parse_cardinal(seg: list[str]) -> int:
-    """Evaluate a token segment containing magnitude/teen/tens words to an int."""
+def _parse_cardinal(seg: list[str]) -> int | None:
+    """Evaluate a token segment containing magnitude/teen/tens words to an int.
+
+    ATC reads grouped digits before a scale as a concatenated digit string:
+    ``one seven thousand`` is 17,000 (never (1+7)*1000), ``one four thousand
+    six hundred`` is 14,600. Standard English composites keep their grammar
+    (``twenty five hundred`` = 2500, ``two hundred fifty thousand`` =
+    250,000). Returns ``None`` for segments that fit neither reading —
+    mixed digit/tens orders, or non-descending additive scales like the
+    repeated readback ``three thousand three thousand`` — so the caller
+    leaves them as spoken words instead of fusing distinct values.
+    """
     total = 0
     current = 0
+    digits: list[str] = []  # pending run of consecutive single-digit tokens
+    last_additive = 0  # last thousand/million applied; must strictly descend
+
+    def flush() -> bool:
+        """Fold the pending digit run into ``current``; False = malformed."""
+        nonlocal current
+        if not digits:
+            return True
+        if len(digits) == 1:
+            current += int(digits[0])
+        elif current:
+            return False  # "twenty one seven thousand": tens then a group
+        else:
+            current = int("".join(digits))  # ATC group: concatenate
+        digits.clear()
+        return True
+
     for tok in seg:
         if tok in _DIGIT_WORD:
-            current += int(_DIGIT_WORD[tok])
+            digits.append(_DIGIT_WORD[tok])
         elif tok in _WEAK_DIGIT:
-            current += int(_WEAK_DIGIT[tok])
+            digits.append(_WEAK_DIGIT[tok])
         elif _DIGITS_RE.match(tok):
-            current += int(tok)
-        elif tok in _TEENS:
-            current += _TEENS[tok]
-        elif tok in _TENS:
-            current += _TENS[tok]
+            if digits or current:
+                return None  # "one 25 thousand" / "25 4 hundred": no grammar
+            current = int(tok)
+        elif tok in _TEENS or tok in _TENS:
+            if digits:
+                return None  # digit-then-tens ("five twenty") is no cardinal
+            current += _TEENS.get(tok) or _TENS[tok]
         elif tok in _SCALE:
+            if not flush():
+                return None
             scale = _SCALE[tok]
-            if current == 0:
-                current = 1
             if scale == 100:
-                current *= 100
+                current = (current or 1) * 100
             else:
-                total += current * scale
+                if last_additive and scale >= last_additive:
+                    return None  # "three thousand three thousand"
+                total += (current or 1) * scale
                 current = 0
+                last_additive = scale
+    if not flush():
+        return None
     return total + current
 
 
@@ -181,8 +215,11 @@ def _segment_to_tokens(seg: list[str]) -> list[str]:
     if not seg:
         return []
     if _has_scale(seg):
-        return _spoken(str(_parse_cardinal(seg))).split()
-    if _all_digit_tokens(seg):
+        value = _parse_cardinal(seg)
+        if value is not None:
+            return _spoken(str(value)).split()
+        # malformed composite: fall through to the word-preserving path
+    elif _all_digit_tokens(seg):
         return _spoken(_digit_chars(seg)).split()
     out: list[str] = []
     for tok in seg:
