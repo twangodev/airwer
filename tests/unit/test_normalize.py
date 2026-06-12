@@ -136,3 +136,13 @@ def test_digit_first_glued_tokens_split():
     assert normalize("cleared 654charlie") == "cleared six five four charlie"
     # interior digits split on both sides
     assert normalize("Epsilon616Mike") == "epsilon six one six mike"
+
+
+def test_multi_dot_sequences_split_to_digit_groups():
+    # dotted frequency fragments and dates fold on the FIRST pass
+    assert normalize("departure on 1.5.7") == "departure on one five seven"
+    assert normalize("on 25.07.2017") == "on two five zero seven two zero one seven"
+    # idempotent now
+    assert normalize(normalize("squawky 11.3.1")) == normalize("squawky 11.3.1")
+    # single decimals untouched
+    assert normalize("contact 125.7") == "contact one two five decimal seven"

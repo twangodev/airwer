@@ -32,6 +32,8 @@ _GLUE_PUNCT_RE = re.compile(r"[-‐‑‒–—―_/]")
 _XRAY_RE = re.compile(r"\bx ray\b")
 _PUNCT_EXCEPT_DOT = re.compile(r"[^a-z0-9\s.]")
 _NON_DECIMAL_DOT_RE = re.compile(r"(?<!\d)\.|\.(?!\d)")
+# 2+ dots is no decimal: "1.5.7" / "25.07.2017" are digit groups, not numbers
+_MULTI_DOT_RE = re.compile(r"\b\d+(?:\.\d+){2,}\b")
 _GLUED_RE = re.compile(r"\b([a-z]+)(\d+)\b")  # "qnh1017" -> "qnh 1017"
 # every letter<->digit boundary, both directions: "2606papa" -> "2606 papa",
 # "epsilon616mike" -> "epsilon 616 mike" (the letters-then-digits _GLUED_RE
@@ -112,6 +114,7 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
     # a sentence dot is also a number-run boundary: "270. Three thousand"
     # must not fuse. The sentinel survives the token-wise steps below and is
     # consumed at the reconcile step (or stripped, for configs without it).
+    s = _MULTI_DOT_RE.sub(lambda m: m.group(0).replace(".", " "), s)
     s = _NON_DECIMAL_DOT_RE.sub(" \x00 ", s)
     if cfg.strip_fillers:
         s = _drop_words(s, vocab.FILLERS)
