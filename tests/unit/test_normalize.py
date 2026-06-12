@@ -96,3 +96,25 @@ def test_decimal_survives_trailing_sentence_dot():
     assert normalize("Contact departure 125.7.") == (
         "contact departure one two five decimal seven"
     )
+
+
+def test_gluing_punctuation_becomes_space():
+    # hyphen/dash/slash/underscore between words must separate, not glue
+    assert normalize("route—approach checkpoint") == "route approach checkpoint"
+    assert normalize("three-three-seven-four") == "three three seven four"
+    assert normalize("climb/maintain") == "climb maintain"
+    # value semantics preserved: twenty-five hundred is still 2500
+    assert normalize("twenty-five hundred") == "two five zero zero"
+
+
+def test_xray_folds_with_hyphen_and_with_space():
+    assert normalize("hotel x-ray") == "hotel xray"
+    assert normalize("hotel x ray") == "hotel xray"
+
+
+def test_accents_fold_to_base_letters():
+    assert normalize("Hôtel schöne") == "hotel schone"
+
+
+def test_digit_comma_still_deleted_not_spaced():
+    assert normalize("10,000") == "one zero zero zero zero"
