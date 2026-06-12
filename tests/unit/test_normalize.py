@@ -146,3 +146,7 @@ def test_multi_dot_sequences_split_to_digit_groups():
     assert normalize(normalize("squawky 11.3.1")) == normalize("squawky 11.3.1")
     # single decimals untouched
     assert normalize("contact 125.7") == "contact one two five decimal seven"
+
+
+def test_xray_folds_through_stripped_junk():
+    assert normalize("hotel echo x ⁇ ray downwind") == "hotel echo xray downwind"
