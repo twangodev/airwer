@@ -63,7 +63,7 @@ FUNCTION_WORDS: frozenset[str] = frozenset({"the", "a", "an", "and", "to", "of"}
 ICAO_TELEPHONY: dict[str, str] = {
     "ewg": "eurowings", "ryr": "ryanair", "dlh": "lufthansa", "qtr": "qatari",
     "wzz": "wizz air", "csa": "csa", "tap": "air portugal", "uae": "emirates",
-    "afr": "airfrans", "baw": "speedbird", "ezs": "easy", "ezy": "easy",
+    "afr": "airfrans", "baw": "speedbird", "ezs": "topswiss", "ezy": "easy",
     "pgt": "sunturk", "vlg": "vueling", "swr": "swiss", "aua": "austrian",
     "tra": "transavia", "lot": "lot", "sdr": "sundair", "tvs": "sky travel",
     "bla": "dark blue", "ira": "iranair", "rot": "tarom", "voe": "volotea",

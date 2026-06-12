@@ -23,3 +23,10 @@ def test_nato_alphabet_complete():
     assert len(vocab.NATO) == 26
     assert vocab.NATO["a"] == "alfa"
     assert vocab.NATO["x"] == "xray"
+
+
+def test_ezs_is_topswiss_not_easy():
+    from airwer import vocab
+
+    assert vocab.ICAO_TELEPHONY["ezs"] == "topswiss"
+    assert vocab.ICAO_TELEPHONY["ezy"] == "easy"
