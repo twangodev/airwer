@@ -124,10 +124,7 @@ def test_atc_digit_group_before_scale_concatenates():
     # leading zero group: "one zero thousand" is 10,000
     assert reconcile("one zero thousand") == "one zero zero zero zero"
     # group + trailing hundreds: 14,600
-    assert (
-        reconcile("one four thousand six hundred")
-        == "one four six zero zero"
-    )
+    assert reconcile("one four thousand six hundred") == "one four six zero zero"
 
 
 def test_standard_english_composites_still_fold():
@@ -145,3 +142,20 @@ def test_malformed_scale_stack_left_as_words():
         "three thousand three thousand"
     )
     assert reconcile("two thousand thousand") == "two thousand thousand"
+
+
+def test_weak_digits_join_groups_before_scales():
+    # "one oh thousand" is 10,000
+    assert reconcile("one oh thousand") == "one zero zero zero zero"
+
+
+def test_numeral_tokens_before_scales():
+    assert reconcile("25 thousand") == "two five zero zero zero"
+    # numeral inside a spoken group fits no grammar; tokens fold on their own
+    assert reconcile("one 25 thousand") == "one two five thousand"
+
+
+def test_mixed_digit_and_tens_orders_left_as_words():
+    assert reconcile("five twenty thousand") == "five twenty thousand"
+    assert reconcile("twenty one seven thousand") == "twenty one seven thousand"
+    assert reconcile("two hundred twenty one seven") == ("two hundred twenty one seven")

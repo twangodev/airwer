@@ -162,6 +162,11 @@ def test_semantic_profile_changes_score():
     assert airwer.wer("affirmative", "affirm", profiles.SEMANTIC) == 0.0
 
 
+def test_scalar_cer_on_scored_reference():
+    assert airwer.cer("tower", "tower") == 0.0
+    assert 0.0 < airwer.cer("tower", "towed") < 1.0
+
+
 def test_scalar_wer_on_empty_normalizing_reference():
     # jiwer-compatible scalar semantics instead of a silent NaN
     assert airwer.wer("", "descend and maintain") == 1.0
