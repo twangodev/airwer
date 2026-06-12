@@ -33,6 +33,10 @@ _XRAY_RE = re.compile(r"\bx ray\b")
 _PUNCT_EXCEPT_DOT = re.compile(r"[^a-z0-9\s.]")
 _NON_DECIMAL_DOT_RE = re.compile(r"(?<!\d)\.|\.(?!\d)")
 _GLUED_RE = re.compile(r"\b([a-z]+)(\d+)\b")  # "qnh1017" -> "qnh 1017"
+# every letter<->digit boundary, both directions: "2606papa" -> "2606 papa",
+# "epsilon616mike" -> "epsilon 616 mike" (the letters-then-digits _GLUED_RE
+# above remains the callsign-expansion gate; this one does the splitting)
+_ALNUM_BOUNDARY_RE = re.compile(r"(?<=[a-z])(?=\d)|(?<=\d)(?=[a-z])")
 _DOT_RE = re.compile(r"\.")
 _WS_RE = re.compile(r"\s+")
 
@@ -116,7 +120,7 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
     if cfg.expand_callsigns:
         s = _expand_callsigns(s)
     if cfg.split_alnum:
-        s = _GLUED_RE.sub(r"\1 \2", s)
+        s = _ALNUM_BOUNDARY_RE.sub(" ", s)
     if cfg.spell_acronyms:
         s = _spell_acronyms(s)
     if cfg.reconcile_numbers:

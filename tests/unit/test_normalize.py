@@ -129,3 +129,10 @@ def test_sentence_dot_breaks_number_runs():
     assert normalize("Contact 125.7. Good day.") == (
         "contact one two five decimal seven good day"
     )
+
+
+def test_digit_first_glued_tokens_split():
+    assert normalize("2606papa") == "two six zero six papa"
+    assert normalize("cleared 654charlie") == "cleared six five four charlie"
+    # interior digits split on both sides
+    assert normalize("Epsilon616Mike") == "epsilon six one six mike"
