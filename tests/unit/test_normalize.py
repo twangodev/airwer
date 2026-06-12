@@ -96,3 +96,57 @@ def test_decimal_survives_trailing_sentence_dot():
     assert normalize("Contact departure 125.7.") == (
         "contact departure one two five decimal seven"
     )
+
+
+def test_gluing_punctuation_becomes_space():
+    # hyphen/dash/slash/underscore between words must separate, not glue
+    assert normalize("route—approach checkpoint") == "route approach checkpoint"
+    assert normalize("three-three-seven-four") == "three three seven four"
+    assert normalize("climb/maintain") == "climb maintain"
+    # value semantics preserved: twenty-five hundred is still 2500
+    assert normalize("twenty-five hundred") == "two five zero zero"
+
+
+def test_xray_folds_with_hyphen_and_with_space():
+    assert normalize("hotel x-ray") == "hotel xray"
+    assert normalize("hotel x ray") == "hotel xray"
+
+
+def test_accents_fold_to_base_letters():
+    assert normalize("Hôtel schöne") == "hotel schone"
+
+
+def test_digit_comma_still_deleted_not_spaced():
+    assert normalize("10,000") == "one zero zero zero zero"
+
+
+def test_sentence_dot_breaks_number_runs():
+    # "270. Three thousand" must not fuse into one number run
+    assert normalize("heading 270. Three thousand.") == (
+        "heading two seven zero three zero zero zero"
+    )
+    # while decimals still survive their trailing sentence dot
+    assert normalize("Contact 125.7. Good day.") == (
+        "contact one two five decimal seven good day"
+    )
+
+
+def test_digit_first_glued_tokens_split():
+    assert normalize("2606papa") == "two six zero six papa"
+    assert normalize("cleared 654charlie") == "cleared six five four charlie"
+    # interior digits split on both sides
+    assert normalize("Epsilon616Mike") == "epsilon six one six mike"
+
+
+def test_multi_dot_sequences_split_to_digit_groups():
+    # dotted frequency fragments and dates fold on the FIRST pass
+    assert normalize("departure on 1.5.7") == "departure on one five seven"
+    assert normalize("on 25.07.2017") == "on two five zero seven two zero one seven"
+    # idempotent now
+    assert normalize(normalize("squawky 11.3.1")) == normalize("squawky 11.3.1")
+    # single decimals untouched
+    assert normalize("contact 125.7") == "contact one two five decimal seven"
+
+
+def test_xray_folds_through_stripped_junk():
+    assert normalize("hotel echo x ⁇ ray downwind") == "hotel echo xray downwind"

@@ -12,6 +12,7 @@ correctly), callsigns are expanded *before* glued letter+digit tokens are split
 from __future__ import annotations
 
 import re
+import unicodedata
 from typing import TYPE_CHECKING
 
 from airwer import vocab
@@ -23,9 +24,22 @@ if TYPE_CHECKING:
 
 # annotation spans: [..], (..), <..>
 _BRACKET_RE = re.compile(r"\[[^\]]*\]|\([^)]*\)|<[^>]*>")
+# joining punctuation separates words ("route—approach" is two words, and
+# "three-three-seven-four" is four digits) — substituted with a space BEFORE
+# the deleting pass below, which would otherwise glue the fragments together
+_GLUE_PUNCT_RE = re.compile(r"[-‐‑‒–—―_/]")
+# the one hyphenation the vocab spells solid: NATO "x-ray"/"x ray" -> "xray"
+# (\s+: stripped junk between the words may leave extra whitespace behind)
+_XRAY_RE = re.compile(r"\bx\s+ray\b")
 _PUNCT_EXCEPT_DOT = re.compile(r"[^a-z0-9\s.]")
 _NON_DECIMAL_DOT_RE = re.compile(r"(?<!\d)\.|\.(?!\d)")
+# 2+ dots is no decimal: "1.5.7" / "25.07.2017" are digit groups, not numbers
+_MULTI_DOT_RE = re.compile(r"\b\d+(?:\.\d+){2,}\b")
 _GLUED_RE = re.compile(r"\b([a-z]+)(\d+)\b")  # "qnh1017" -> "qnh 1017"
+# every letter<->digit boundary, both directions: "2606papa" -> "2606 papa",
+# "epsilon616mike" -> "epsilon 616 mike" (the letters-then-digits _GLUED_RE
+# above remains the callsign-expansion gate; this one does the splitting)
+_ALNUM_BOUNDARY_RE = re.compile(r"(?<=[a-z])(?=\d)|(?<=\d)(?=[a-z])")
 _DOT_RE = re.compile(r"\.")
 _WS_RE = re.compile(r"\s+")
 
@@ -84,14 +98,26 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
     'turn heading two one zero descend flight level two five zero'
     """
     cfg = config if config is not None else CANONICAL
-    s = text.lower().replace("\u2018", "'").replace("\u2019", "'")
+    # NFKD + strip combining marks: accented letters fold to their base
+    # ("H\u00f4tel" -> "hotel") instead of being deleted to junk ("htel")
+    s = unicodedata.normalize("NFKD", text.lower())
+    s = "".join(c for c in s if not unicodedata.combining(c))
+    for apostrophe in ("\u2018", "\u2019", "\u02bc", "\u2032", "\uff07"):
+        s = s.replace(apostrophe, "'")
     if cfg.strip_tags:
         s = _BRACKET_RE.sub(" ", s)
     if cfg.expand_contractions:
         s = _expand_contractions(s)
-    # delete, not space: "x-ray" -> "xray", "10,000" -> "10000"
+    s = _GLUE_PUNCT_RE.sub(" ", s)
+    # delete, not space: "don't" -> "dont", "10,000" -> "10000"
     s = _PUNCT_EXCEPT_DOT.sub("", s)
-    s = _NON_DECIMAL_DOT_RE.sub(" ", s)
+    # after deletions, so junk between the words ("x ⁇ ray") can't block it
+    s = _XRAY_RE.sub("xray", s)
+    # a sentence dot is also a number-run boundary: "270. Three thousand"
+    # must not fuse. The sentinel survives the token-wise steps below and is
+    # consumed at the reconcile step (or stripped, for configs without it).
+    s = _MULTI_DOT_RE.sub(lambda m: m.group(0).replace(".", " "), s)
+    s = _NON_DECIMAL_DOT_RE.sub(" \x00 ", s)
     if cfg.strip_fillers:
         s = _drop_words(s, vocab.FILLERS)
     if cfg.fold_nato:
@@ -99,11 +125,12 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
     if cfg.expand_callsigns:
         s = _expand_callsigns(s)
     if cfg.split_alnum:
-        s = _GLUED_RE.sub(r"\1 \2", s)
+        s = _ALNUM_BOUNDARY_RE.sub(" ", s)
     if cfg.spell_acronyms:
         s = _spell_acronyms(s)
     if cfg.reconcile_numbers:
-        s = reconcile(s)
+        s = " ".join(reconcile(chunk) for chunk in s.split("\x00"))
+    s = s.replace("\x00", " ")
     if cfg.fold_spelling:
         s = _map_words(s, vocab.SPELLING)
     if cfg.fold_procedure_words:

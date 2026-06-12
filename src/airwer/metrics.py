@@ -20,6 +20,7 @@ length); they are excluded from the corpus metric and counted in
 
 from __future__ import annotations
 
+import math
 import statistics
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -194,8 +195,23 @@ def wer(
     hypothesis: str | Sequence[str],
     config: WerConfig | None = None,
 ) -> float:
-    """Corpus WER under the default CANONICAL profile, or ``config`` if given."""
-    return process(reference, hypothesis, config).wer
+    """Corpus WER under the default CANONICAL profile, or ``config`` if given.
+
+    When EVERY reference normalizes empty there is nothing to score against:
+    matching jiwer's scalar semantics, the result is 1.0 if any hypothesis
+    has content and 0.0 if the hypotheses are empty too (never NaN).
+    """
+    result = process(reference, hypothesis, config)
+    if math.isnan(result.wer) and result.n_scored == 0 and result.n > 0:
+        return _all_empty_ref_score(hypothesis, config)
+    return result.wer
+
+
+def _all_empty_ref_score(
+    hypothesis: str | Sequence[str], config: WerConfig | None
+) -> float:
+    hyps = [hypothesis] if isinstance(hypothesis, str) else list(hypothesis)
+    return 1.0 if any(normalize(h, config).strip() for h in hyps) else 0.0
 
 
 def agreement(a: str, b: str, config: WerConfig | None = None) -> float:
@@ -229,8 +245,14 @@ def cer(
     hypothesis: str | Sequence[str],
     config: WerConfig | None = None,
 ) -> float:
-    """Corpus character error rate under the default CANONICAL profile, or ``config``."""
-    return process(reference, hypothesis, config).cer
+    """Corpus character error rate under the default CANONICAL profile, or ``config``.
+
+    Same empty-reference semantics as :func:`wer` (1.0/0.0, never NaN).
+    """
+    result = process(reference, hypothesis, config)
+    if math.isnan(result.cer) and result.n_scored == 0 and result.n > 0:
+        return _all_empty_ref_score(hypothesis, config)
+    return result.cer
 
 
 def numeric_wer(

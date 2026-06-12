@@ -160,3 +160,17 @@ def test_semantic_profile_changes_score():
     # "affirmative" vs "affirm" is a substitution under canonical, equal under semantic.
     assert airwer.wer("affirmative", "affirm") > 0.0
     assert airwer.wer("affirmative", "affirm", profiles.SEMANTIC) == 0.0
+
+
+def test_scalar_cer_on_scored_reference():
+    assert airwer.cer("tower", "tower") == 0.0
+    assert 0.0 < airwer.cer("tower", "towed") < 1.0
+
+
+def test_scalar_wer_on_empty_normalizing_reference():
+    # jiwer-compatible scalar semantics instead of a silent NaN
+    assert airwer.wer("", "descend and maintain") == 1.0
+    assert airwer.wer("uh", "descend") == 1.0  # filler-only ref normalizes empty
+    assert airwer.wer("", "") == 0.0
+    assert airwer.wer("uh", "um") == 0.0  # both sides normalize empty
+    assert airwer.cer("", "descend") == 1.0
