@@ -35,6 +35,10 @@ def test_nato_variant_folded():
     assert normalize("cleared alpha bravo") == "cleared alfa bravo"
 
 
+def test_juliette_spelling_variant_folded():
+    assert normalize("juliette") == "juliett"
+
+
 def test_punctuation_and_case_neutralized():
     assert normalize("Descend, maintain.") == "descend maintain"
 
@@ -150,3 +154,19 @@ def test_multi_dot_sequences_split_to_digit_groups():
 
 def test_xray_folds_through_stripped_junk():
     assert normalize("hotel echo x ⁇ ray downwind") == "hotel echo xray downwind"
+
+
+def test_no_hallucinations_stripped_by_default():
+    # airwer ships no hallucination patterns; CANONICAL leaves the text alone.
+    assert normalize("© BF-WATCH TV 2021") == "bf watch tv two zero two one"
+
+
+def test_provided_hallucination_patterns_stripped():
+    # the caller supplies its model's known watermarks; applied early so the
+    # year folds away with the rest, mid-utterance occurrences too.
+    cfg = profiles.CANONICAL.replace(
+        hallucinations=(r"bf[\s-]?watch tv(?:\s+\d+)?", r"transcript emily beynon")
+    )
+    assert normalize("© BF-WATCH TV 2021", cfg) == ""
+    assert normalize("© transcript Emily Beynon", cfg) == ""
+    assert normalize("cleared to land BF-WATCH TV 2021", cfg) == "cleared to land"

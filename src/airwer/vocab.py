@@ -28,6 +28,7 @@ NATO: dict[str, str] = {
 NATO_VARIANTS: dict[str, str] = {
     "alpha": "alfa",
     "juliet": "juliett",
+    "juliette": "juliett",
     "whisky": "whiskey",
 }
 

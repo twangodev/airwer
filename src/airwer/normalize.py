@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from functools import cache
 from typing import TYPE_CHECKING
 
 from airwer import vocab
@@ -52,6 +53,13 @@ _CONTRACTIONS: dict[str, str] = {
     "you're": "you are", "they're": "they are", "i'm": "i am",
     "i'll": "i will", "we'll": "we will", "you'll": "you will",
 }  # fmt: skip
+
+
+@cache
+def _hallucination_re(patterns: tuple[str, ...]) -> re.Pattern[str]:
+    """Compile caller-provided hallucination patterns into one alternation,
+    cached so the per-call cost is a dict lookup, not a recompile."""
+    return re.compile("|".join(patterns), re.IGNORECASE)
 
 
 def _map_words(text: str, mapping: dict[str, str]) -> str:
@@ -104,6 +112,8 @@ def normalize(text: str, config: WerConfig | None = None) -> str:
     s = "".join(c for c in s if not unicodedata.combining(c))
     for apostrophe in ("\u2018", "\u2019", "\u02bc", "\u2032", "\uff07"):
         s = s.replace(apostrophe, "'")
+    if cfg.hallucinations:
+        s = _hallucination_re(cfg.hallucinations).sub(" ", s)
     if cfg.strip_tags:
         s = _BRACKET_RE.sub(" ", s)
     if cfg.expand_contractions:
