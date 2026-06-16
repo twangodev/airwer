@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/twangodev/airwer/compare/v0.2.3...v0.2.4) (2026-06-16)
+
+
+### Bug Fixes
+
+* configurable hallucination stripping and scale-less number folding ([#20](https://github.com/twangodev/airwer/issues/20)) ([463fd02](https://github.com/twangodev/airwer/commit/463fd02f0403810cb13f395b34b0a10ae1fd78ce))
+
 ## [0.2.3](https://github.com/twangodev/airwer/compare/v0.2.2...v0.2.3) (2026-06-12)
 
 
