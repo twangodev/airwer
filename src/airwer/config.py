@@ -63,7 +63,13 @@ class WerConfig:
     """Expand alphanumeric callsign/registration codes to their spoken form
     (``EWG7AB`` -> ``eurowings seven alfa bravo``). Heuristic and lossy."""
 
-    def replace(self, **changes: bool) -> WerConfig:
+    hallucinations: tuple[str, ...] = ()
+    """Caller-provided regexes for known ASR hallucinations to strip (e.g. a
+    model's training-data watermark like ``bf[\\s-]?watch tv``). Empty by
+    default: airwer ships none, since these are model- and corpus-specific.
+    Matched case-insensitively, early, before punctuation/number folding."""
+
+    def replace(self, **changes: object) -> WerConfig:
         """Return a copy with the given toggles overridden."""
         return replace(self, **changes)
 

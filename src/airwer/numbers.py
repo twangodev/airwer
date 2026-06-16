@@ -201,6 +201,22 @@ def _digit_chars(seg: list[str]) -> str:
     return "".join(chars)
 
 
+def _scaleless_value(seg: list[str]) -> int | None:
+    """Value of an *unambiguous* scale-less cardinal, else None.
+
+    Folds only the shapes that map to exactly one 2-digit value: a teen
+    ("sixteen"=16), a tens word ("thirty"=30), or tens+unit ("thirty five"=35).
+    Everything else (digit-then-tens like "two fifty", repeated/additive tens
+    like "thirty thirty") returns None and stays as words -- no false matches,
+    no leading-zero loss.
+    """
+    if len(seg) == 1:
+        return _TEENS.get(seg[0]) or _TENS.get(seg[0])
+    if len(seg) == 2 and seg[0] in _TENS and seg[1] in _DIGIT_WORD:
+        return _TENS[seg[0]] + int(_DIGIT_WORD[seg[1]])
+    return None
+
+
 def _segment_to_tokens(seg: list[str]) -> list[str]:
     """Canonical tokens for one decimal-free segment.
 
@@ -208,9 +224,11 @@ def _segment_to_tokens(seg: list[str]) -> list[str]:
       int, then render digit-by-digit;
     * pure digit sequence ("two one zero", "010") -> digit-by-digit, literal
       digits preserved;
-    * ambiguous scale-less tens/teens run ("two fifty", "twenty five") -> NOT
-      evaluated (that would risk both false matches and dropped leading zeros);
-      single-digit parts are folded, tens/teen words kept verbatim.
+    * unambiguous scale-less cardinal ("thirty five"=35, "sixteen"=16) ->
+      folded to digit form so it matches its digit-string twin;
+    * ambiguous scale-less run ("two fifty", "thirty thirty") -> NOT evaluated
+      (that would risk false matches and dropped leading zeros); single-digit
+      parts are folded, tens/teen words kept verbatim.
     """
     if not seg:
         return []
@@ -221,6 +239,10 @@ def _segment_to_tokens(seg: list[str]) -> list[str]:
         # malformed composite: fall through to the word-preserving path
     elif _all_digit_tokens(seg):
         return _spoken(_digit_chars(seg)).split()
+    else:
+        value = _scaleless_value(seg)
+        if value is not None:
+            return _spoken(str(value)).split()
     out: list[str] = []
     for tok in seg:
         if _DIGITS_RE.match(tok):

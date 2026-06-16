@@ -67,11 +67,21 @@ def test_scale_anchored_tens_and_units():
     assert reconcile("twenty five hundred") == "two five zero zero"
 
 
+def test_unambiguous_scaleless_cardinal_folds_to_digits():
+    # A teen, a tens word, or tens+unit is unambiguously a 2-digit value, so it
+    # folds to digit form and matches the digit-string twin ("thirty five"=35).
+    assert reconcile("thirty five") == "three five"
+    assert reconcile("twenty five") == "two five"
+    assert reconcile("sixteen") == "one six"
+    assert reconcile("thirty") == "three zero"
+
+
 def test_colloquial_scaleless_composite_not_evaluated():
-    # "two fifty" is ambiguous (250 vs 2/50) -> left as words, never summed to 52.
+    # digit-then-tens is ambiguous (250 vs 2/50) -> left as words, never summed.
     assert reconcile("two fifty") == "two fifty"
     assert reconcile("one twenty") == "one twenty"
-    assert reconcile("twenty five") == "twenty five"
+    # repeated/additive tens are not a single value either
+    assert reconcile("thirty thirty") == "thirty thirty"
 
 
 def test_leading_zero_not_dropped_by_a_tens_word():
